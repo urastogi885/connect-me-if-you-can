@@ -28,17 +28,18 @@ class Connect4GUI:
         # Draw circles to represent dots in the game
         for i in range(BOARD_SIZE[0]):
             for j in range(BOARD_SIZE[1]):
+                # Get center of the next circle to be drawn on the GUI
                 center = (j * CELL_SIZE + (CELL_SIZE // 2)), ((i + 1) * CELL_SIZE + (CELL_SIZE // 2))
+                # Draw the circle on the GUI
                 pygame.draw.circle(self.screen, BLACK, center, RADIUS)
         # Update GUI
         pygame.display.update()
 
-    def check_event(self, player):
+    def check_event(self, game_status, player):
         """
         Function to check for events occurring inside the GUI screen
         :return: nothing
         """
-        game_status = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
@@ -58,7 +59,7 @@ class Connect4GUI:
                 if row_index != -1:
                     center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
                               (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
-                    self.game.add_coin(row_index, col_index, player)
+                    self.game.add_player_token(row_index, col_index, player)
                 if player:
                     pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
                 else:
@@ -76,4 +77,4 @@ class Connect4GUI:
         pygame.display.update()
         if game_status:
             pygame.time.wait(5000)
-        return player, game_status
+        return game_status, player
