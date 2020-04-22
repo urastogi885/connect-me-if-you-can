@@ -20,14 +20,30 @@ class Game:
                 self.check_diagonal_win(row, col, player))
 
     def check_horizontal_win(self, row, col, player):
-        if col <= BOARD_SIZE[1] // 2:
+        try:
             if (self.board[row][col + 1] == player + 1 and self.board[row][col + 2] == player + 1 and
                     self.board[row][col + 3] == player + 1):
                 return True
-        else:
+        except IndexError:
+            pass
+        try:
+            if (self.board[row][col + 1] == player + 1 and self.board[row][col + 2] == player + 1 and
+                    self.board[row][col - 1] == player + 1):
+                return True
+        except IndexError:
+            pass
+        try:
+            if (self.board[row][col + 1] == player + 1 and self.board[row][col - 2] == player + 1 and
+                    self.board[row][col - 1] == player + 1):
+                return True
+        except IndexError:
+            pass
+        try:
             if (self.board[row][col - 1] == player + 1 and self.board[row][col - 2] == player + 1 and
                     self.board[row][col - 3] == player + 1):
                 return True
+        except IndexError:
+            pass
         return False
 
     def check_vertical_win(self, row, col, player):
@@ -38,20 +54,62 @@ class Game:
         return False
 
     def check_diagonal_win(self, row, col, player):
-        if row < BOARD_SIZE[0] // 2 and col <= (BOARD_SIZE[1] // 2) + 1:
+        # Checks for the positively-sloped diagonal wins
+        # If all pieces lie ahead of the last dropped piece
+        try:
             if (self.board[row + 1][col + 1] == player + 1 and self.board[row + 2][col + 2] == player + 1 and
                     self.board[row + 3][col + 3] == player + 1):
                 return True
-        elif BOARD_SIZE[0] // 2 <= row and col <= (BOARD_SIZE[1] // 2) + 1:
-            if (self.board[row - 1][col + 1] == player + 1 and self.board[row - 2][col + 2] == player + 1 and
-                    self.board[row - 3][col + 3] == player + 1):
+        except IndexError:
+            pass
+        # If 2 pieces lie ahead and 1 piece lies behind the last dropped piece
+        try:
+            if (self.board[row + 1][col + 1] == player + 1 and self.board[row + 2][col + 2] == player + 1 and
+                    self.board[row - 1][col - 1] == player + 1):
                 return True
-        if BOARD_SIZE[0] // 2 <= row and BOARD_SIZE[1] // 2 <= col:
+        except IndexError:
+            pass
+        # If 1 piece lies ahead and 2 pieces lie behind the last dropped piece
+        try:
+            if (self.board[row - 1][col - 1] == player + 1 and self.board[row - 2][col - 2] == player + 1 and
+                    self.board[row + 1][col + 1] == player + 1):
+                return True
+        except IndexError:
+            pass
+        # If all pieces lie behind the last dropped piece
+        try:
             if (self.board[row - 1][col - 1] == player + 1 and self.board[row - 2][col - 2] == player + 1 and
                     self.board[row - 3][col - 3] == player + 1):
                 return True
-        elif row < BOARD_SIZE[0] // 2 and BOARD_SIZE[1] // 2 <= col:
+        except IndexError:
+            pass
+        # Checks for the negatively-sloped diagonal wins
+        # If all pieces lie behind the last dropped piece
+        try:
+            if (self.board[row - 1][col + 1] == player + 1 and self.board[row - 2][col + 2] == player + 1 and
+                    self.board[row - 3][col + 3] == player + 1):
+                return True
+        except IndexError:
+            pass
+        # If 1 piece lies ahead and 2 pieces lie behind the last dropped piece
+        try:
+            if (self.board[row - 1][col + 1] == player + 1 and self.board[row - 2][col + 2] == player + 1 and
+                    self.board[row + 1][col - 1] == player + 1):
+                return True
+        except IndexError:
+            pass
+        # If 2 pieces lie ahead and 1 piece lies behind the last dropped piece
+        try:
+            if (self.board[row + 1][col - 1] == player + 1 and self.board[row + 2][col - 2] == player + 1 and
+                    self.board[row - 1][col + 1] == player + 1):
+                return True
+        except IndexError:
+            pass
+        # If all pieces lie ahead of the last dropped piece
+        try:
             if (self.board[row + 1][col - 1] == player + 1 and self.board[row + 2][col - 2] == player + 1 and
                     self.board[row + 3][col - 3] == player + 1):
                 return True
+        except IndexError:
+            pass
         return False
