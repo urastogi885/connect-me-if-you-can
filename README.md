@@ -4,6 +4,12 @@
 ## Overview
 A self-learning connect-4 game with a simple GUI.
 
+## Todo
+
+- Check for the tie condition
+- Reset board upon reaching the tie condition
+- Add reset option in GUI
+
 ## Dependencies
 
 - [Python3](https://www.python.org/downloads/)
