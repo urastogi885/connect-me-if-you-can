@@ -98,7 +98,9 @@ class Game:
         :param player: player whose token was placed last
         :return: boolean value whether the last move was a winning move
         """
-        if row <= BOARD_SIZE[0] // 2:
+        # Win in vertical condition is only possible if the last-placed token is above the 4th row
+        if row >= BOARD_SIZE[0] // 2:
+            # All tokens below the last-placed token should be of the same player for a win
             if (self.board[row - 1][col] == player + 1 and self.board[row - 2][col] == player + 1 and
                     self.board[row - 3][col] == player + 1):
                 return True
