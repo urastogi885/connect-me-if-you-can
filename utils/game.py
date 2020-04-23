@@ -53,34 +53,41 @@ class Game:
         :param player: player whose token was placed last
         :return: boolean value whether the last move was a winning move
         """
-        # If all pieces lie ahead of the last dropped piece
-        try:
-            if (self.board[row][col + 1] == player + 1 and self.board[row][col + 2] == player + 1 and
-                    self.board[row][col + 3] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If 2 pieces lie ahead and 1 piece lies behind the last dropped piece
-        try:
-            if (self.board[row][col + 1] == player + 1 and self.board[row][col + 2] == player + 1 and
-                    self.board[row][col - 1] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If 1 piece lies ahead and 2 pieces lie behind the last dropped piece
-        try:
-            if (self.board[row][col + 1] == player + 1 and self.board[row][col - 2] == player + 1 and
-                    self.board[row][col - 1] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If all pieces lie behind the last dropped piece
-        try:
-            if (self.board[row][col - 1] == player + 1 and self.board[row][col - 2] == player + 1 and
-                    self.board[row][col - 3] == player + 1):
-                return True
-        except IndexError:
-            pass
+        # Define count to keep track of adjacent tokens of the player
+        count = 1
+        # Define variable to store the column index of the next adjacent token
+        next_col = col
+        # Define variable to check for tokens ahead of the last placed token
+        is_forward = True
+        # Loop to iterate for tokens ahead of the last placed token
+        # Do not run loop more than 3 times
+        while is_forward or next_col != col + 3:
+            # Update the column index of the next token
+            next_col += 1
+            # Next index should be within in the board and
+            # Verify that next token is the player's token
+            if next_col < BOARD_SIZE[1] and self.board[row][next_col] == player + 1:
+                count += 1
+            # Break out of loop and check in opposite direction
+            else:
+                is_forward = False
+                next_col = col
+                break
+        # Loop to iterate for tokens behind the last placed token
+        # Do not run loop more than 3 times
+        while not is_forward or next_col != col - 3:
+            # Update the column index of the next token
+            next_col -= 1
+            # Next index should be within in the board and
+            # Verify that next token is the player's token
+            if next_col >= 0 and self.board[row][next_col] == player + 1:
+                count += 1
+            # Break out of loop
+            else:
+                break
+        # Player wins if there are 4 adjacent tokens
+        if count == 4:
+            return True
         return False
 
     def check_vertical_win(self, row, col, player):
