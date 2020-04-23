@@ -43,7 +43,7 @@ class Game:
         :return: boolean value whether the last move was a winning move
         """
         return (self.check_horizontal_win(row, col, player) or self.check_vertical_win(row, col, player) or
-                self.check_diagonal_win(row, col, player) or self.check_major_diagonal(row, col, player))
+                self.check_minor_diagonal(row, col, player) or self.check_major_diagonal(row, col, player))
 
     def check_horizontal_win(self, row, col, player):
         """
@@ -215,6 +215,55 @@ class Game:
             # Next location should be within in the board and
             # Verify that next token is the player's token
             if next_row >= 0 and next_col >= 0 and self.board[next_row][next_col] == player + 1:
+                count += 1
+            # Break out of loop
+            else:
+                break
+        # Player wins if there are 4 adjacent tokens
+        if count == 4:
+            return True
+        return False
+
+    def check_minor_diagonal(self, row, col, player):
+        """
+        Method to check for winning move along the principal minor diagonal
+        :param row: index of the row where the last token of the player was placed
+        :param col: index of the column where the last token of the player was placed
+        :param player: player whose token was placed last
+        :return: boolean value whether the last move was a winning move
+        """
+        # Define count to keep track of adjacent tokens of the player
+        count = 1
+        # Define variables to store the location of the next adjacent token
+        # Instantiate them with location of the last-placed token
+        next_row, next_col = row, col
+        # Define variable to check for tokens ahead of the last placed token
+        is_forward = True
+        # Loop to iterate for tokens ahead of the last placed token
+        # Do not run loop more than 3 times
+        while is_forward or next_row != row + 3 or next_col != col - 3:
+            # Update the location of the next token
+            next_row += 1
+            next_col -= 1
+            # Next location should be within in the board and
+            # Verify that next token is the player's token
+            if next_row < BOARD_SIZE[0] and next_col >= 0 and self.board[next_row][next_col] == player + 1:
+                count += 1
+            # Break out of loop and check in opposite direction
+            else:
+                is_forward = False
+                next_row = row
+                next_col = col
+                break
+        # Loop to iterate for tokens behind the last placed token
+        # Do not run loop more than 3 times
+        while not is_forward or next_row != row - 3 or next_col != col + 3:
+            # Update the location of the next token
+            next_row -= 1
+            next_col += 1
+            # Next location should be within in the board and
+            # Verify that next token is the player's token
+            if next_row >= 0 and next_col < BOARD_SIZE[1] and self.board[next_row][next_col] == player + 1:
                 count += 1
             # Break out of loop
             else:
