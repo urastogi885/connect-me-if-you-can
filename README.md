@@ -6,13 +6,15 @@ A self-learning connect-4 game with a simple GUI.
 
 ## Todo
 
+- Implement self-learning algorithm for the game
+- Add various playing options such as 2 player, play versus computer, ai vs ai
 - Check for the tie condition
 - Reset board upon reaching the tie condition
 - Add reset option in GUI
 
 ## Dependencies
 
-- [Python3](https://www.python.org/downloads/)
+- Python3
 - Python3-tk
 - Python3 Libraries: [Numpy](https://numpy.org/), [PyGame](https://www.pygame.org/wiki/GettingStarted)
 
