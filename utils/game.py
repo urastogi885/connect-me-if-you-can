@@ -62,7 +62,7 @@ class Game:
         is_forward = True
         # Loop to iterate for tokens ahead of the last placed token
         # Do not run loop more than 3 times
-        while is_forward or next_col != col + 3:
+        while is_forward and next_col < col + 3:
             # Update the column index of the next token
             next_col += 1
             # Next index should be within in the board and
@@ -76,7 +76,7 @@ class Game:
                 break
         # Loop to iterate for tokens behind the last placed token
         # Do not run loop more than 3 times
-        while not is_forward or next_col != col - 3:
+        while not is_forward and next_col > col - 3:
             # Update the column index of the next token
             next_col -= 1
             # Next index should be within in the board and
@@ -124,7 +124,7 @@ class Game:
         is_forward = True
         # Loop to iterate for tokens ahead of the last placed token
         # Do not run loop more than 3 times
-        while is_forward or next_row != row + 3 or next_col != col + 3:
+        while is_forward and next_row < row + 3 and next_col < col + 3:
             # Update the location of the next token
             next_row += 1
             next_col += 1
@@ -140,7 +140,7 @@ class Game:
                 break
         # Loop to iterate for tokens behind the last placed token
         # Do not run loop more than 3 times
-        while not is_forward or next_row != row - 3 or next_col != col - 3:
+        while not is_forward and next_row > row - 3 and next_col > col - 3:
             # Update the location of the next token
             next_row -= 1
             next_col -= 1
@@ -173,7 +173,7 @@ class Game:
         is_forward = True
         # Loop to iterate for tokens ahead of the last placed token
         # Do not run loop more than 3 times
-        while is_forward or next_row != row + 3 or next_col != col - 3:
+        while is_forward and next_row < row + 3 and next_col > col - 3:
             # Update the location of the next token
             next_row += 1
             next_col -= 1
@@ -189,7 +189,7 @@ class Game:
                 break
         # Loop to iterate for tokens behind the last placed token
         # Do not run loop more than 3 times
-        while not is_forward or next_row != row - 3 or next_col != col + 3:
+        while not is_forward and next_row > row - 3 and next_col < col + 3:
             # Update the location of the next token
             next_row -= 1
             next_col += 1
