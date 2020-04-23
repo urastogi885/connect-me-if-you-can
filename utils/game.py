@@ -43,7 +43,7 @@ class Game:
         :return: boolean value whether the last move was a winning move
         """
         return (self.check_horizontal_win(row, col, player) or self.check_vertical_win(row, col, player) or
-                self.check_minor_diagonal(row, col, player) or self.check_major_diagonal(row, col, player))
+                self.check_major_diagonal(row, col, player) or self.check_minor_diagonal(row, col, player))
 
     def check_horizontal_win(self, row, col, player):
         """
@@ -105,74 +105,6 @@ class Game:
             if (self.board[row - 1][col] == player + 1 and self.board[row - 2][col] == player + 1 and
                     self.board[row - 3][col] == player + 1):
                 return True
-        return False
-
-    def check_diagonal_win(self, row, col, player):
-        """
-        Method to check for winning move along the diagonals
-        :param row: index of the row where the last token of the player was placed
-        :param col: index of the column where the last token of the player was placed
-        :param player: player whose token was placed last
-        :return: boolean value whether the last move was a winning move
-        """
-        # Checks for the positively-sloped diagonal wins
-        # If all pieces lie ahead of the last dropped piece
-        # try:
-        #     if (self.board[row + 1][col + 1] == player + 1 and self.board[row + 2][col + 2] == player + 1 and
-        #             self.board[row + 3][col + 3] == player + 1):
-        #         return True
-        # except IndexError:
-        #     pass
-        # # If 2 pieces lie ahead and 1 piece lies behind the last dropped piece
-        # try:
-        #     if (self.board[row + 1][col + 1] == player + 1 and self.board[row + 2][col + 2] == player + 1 and
-        #             self.board[row - 1][col - 1] == player + 1):
-        #         return True
-        # except IndexError:
-        #     pass
-        # # If 1 piece lies ahead and 2 pieces lie behind the last dropped piece
-        # try:
-        #     if (self.board[row - 1][col - 1] == player + 1 and self.board[row - 2][col - 2] == player + 1 and
-        #             self.board[row + 1][col + 1] == player + 1):
-        #         return True
-        # except IndexError:
-        #     pass
-        # # If all pieces lie behind the last dropped piece
-        # try:
-        #     if (self.board[row - 1][col - 1] == player + 1 and self.board[row - 2][col - 2] == player + 1 and
-        #             self.board[row - 3][col - 3] == player + 1):
-        #         return True
-        # except IndexError:
-        #     pass
-        # Checks for the negatively-sloped diagonal wins
-        # If all pieces lie behind the last dropped piece
-        try:
-            if (self.board[row - 1][col + 1] == player + 1 and self.board[row - 2][col + 2] == player + 1 and
-                    self.board[row - 3][col + 3] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If 1 piece lies ahead and 2 pieces lie behind the last dropped piece
-        try:
-            if (self.board[row - 1][col + 1] == player + 1 and self.board[row - 2][col + 2] == player + 1 and
-                    self.board[row + 1][col - 1] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If 2 pieces lie ahead and 1 piece lies behind the last dropped piece
-        try:
-            if (self.board[row + 1][col - 1] == player + 1 and self.board[row + 2][col - 2] == player + 1 and
-                    self.board[row - 1][col + 1] == player + 1):
-                return True
-        except IndexError:
-            pass
-        # If all pieces lie ahead of the last dropped piece
-        try:
-            if (self.board[row + 1][col - 1] == player + 1 and self.board[row + 2][col - 2] == player + 1 and
-                    self.board[row + 3][col - 3] == player + 1):
-                return True
-        except IndexError:
-            pass
         return False
 
     def check_major_diagonal(self, row, col, player):
