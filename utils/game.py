@@ -34,6 +34,17 @@ class Game:
         # Return -1 if none of the rows in the given column on the board is empty
         return -1
 
+    def get_valid_locations(self):
+        """
+        Method to get all the open columns
+        :return: a list of open column indices
+        """
+        valid_locations = []
+        for col in range(BOARD_SIZE[1]):
+            if self.board[BOARD_SIZE[0] - 1][col] == 0:
+                valid_locations.append(col)
+        return valid_locations
+
     def is_winning_move(self, row, col, player):
         """
         Method to check is the last move by a player wins the game
