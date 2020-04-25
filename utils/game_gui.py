@@ -40,6 +40,9 @@ class Connect4GUI:
     def check_event(self, game_status, player):
         """
         Function to check for events occurring inside the GUI screen
+        Executes entire functioning of the game
+        :param game_status: Represents whether the game is continuing
+        :param player: Index of the player whose turn it is
         :return: nothing
         """
         for event in pygame.event.get():
