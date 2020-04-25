@@ -24,6 +24,8 @@ class Connect4GUI:
         :return: nothing
         """
         # Draw rectangle to represent the board area where coins go in
+        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[0], CELL_SIZE))
+        # Draw rectangle to represent the board area where coins go in
         pygame.draw.rect(self.screen, BLUE, (0, CELL_SIZE, GUI_SIZE[0], GUI_SIZE[1] - CELL_SIZE))
         # Draw circles to represent dots in the game
         for i in range(BOARD_SIZE[0]):
@@ -70,6 +72,9 @@ class Connect4GUI:
                     else:
                         label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
                     self.screen.blit(label, (40, 10))
+                    game_status = True
+                if self.game.is_draw():
+                    self.screen.blit('GAME HAS TIED', True, WHITE)
                     game_status = True
                 if row_index != -1:
                     player = (player + 1) % 2
