@@ -204,3 +204,16 @@ class Game:
         if count == 4:
             return True
         return False
+
+    def is_draw(self):
+        """
+        Method to check for a tie in the game
+        :return: True if the game has tied, False otherwise
+        """
+        # Game has tied if all the positions on the board have been filled
+        # This can be easily checked if the top-most row is filled
+        for col in range(BOARD_SIZE[1]):
+            # If any of the top-most row is empty, the game has not tied
+            if self.board[-1][col] == 0:
+                return False
+        return True
