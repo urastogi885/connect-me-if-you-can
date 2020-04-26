@@ -37,6 +37,7 @@ class QPlayer(Player):
         self.discount_factor = gamma
         self.learning_rate = alpha
         self.exploration_chance = epsilon
+        self.q_value = {}
 
     def load_memory(self):
         pass
@@ -48,6 +49,9 @@ class QPlayer(Player):
         pass
 
     def get_q_value(self, board, move):
+        pass
+
+    def calc_q_value(self):
         pass
 
     def train(self, iterations):
