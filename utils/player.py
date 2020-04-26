@@ -1,3 +1,4 @@
+import random
 from utils.constants import HUMAN_PLAYER, Q_ROBOT, RANDOM_ROBOT
 
 
@@ -69,3 +70,10 @@ class RandomPlayer(Player):
         :param token: integer that represents the player on the board
         """
         Player.__init__(self, token)
+
+    def make_move(self, valid_moves):
+        """
+        Method to make a move on the board
+        :return: a tuple containing location of the token to be placed
+        """
+        return random.choice(valid_moves)
