@@ -18,8 +18,34 @@ class GameGUI:
         pygame.init()
         self.screen = pygame.display.set_mode(GUI_SIZE)
         pygame.display.update()
-        # Define font to print winner
+        # Define font to display main headers
         self.font = pygame.font.SysFont('monospace', 75)
+        # Define font to display sub-headings
+        self.options_font = pygame.font.SysFont('monospace', 50)
+
+    def draw_main_menu(self):
+        """
+        Draw main menu with different playing modes of the game
+        :return: nothing
+        """
+        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[0], GUI_SIZE[1]))
+        title = self.font.render(GAME_NAME, True, WHITE)
+        font_size = self.font.size(GAME_NAME)
+        self.screen.blit(title, ((GUI_SIZE[0] - font_size[0]) // 2, 150))
+        # Display multi-player option on main menu
+        multi_player = self.options_font.render(GAME_MODES[0], True, WHITE)
+        font_size = self.options_font.size(GAME_MODES[0])
+        corner = (GUI_SIZE[0] - font_size[0]) // 2, 300
+        self.screen.blit(multi_player, corner)
+        self.rect_multi_player = multi_player.get_rect(topleft=corner)
+        # Display play with computer option on main menu
+        play_computer = self.options_font.render(GAME_MODES[1], True, WHITE)
+        font_size = self.options_font.size(GAME_MODES[1])
+        corner = (GUI_SIZE[0] - font_size[0]) // 2, 400
+        self.screen.blit(play_computer, corner)
+        self.rect_play_computer = play_computer.get_rect(topleft=corner)
+        # Update the GUI screen
+        pygame.display.update()
 
     def draw_board(self):
         """
@@ -40,10 +66,33 @@ class GameGUI:
         # Update GUI
         pygame.display.update()
 
-    def check_event(self, game_status, player):
+    def main_menu(self):
+        """
+        Method to implement the logic behind the menu
+        :return: Mode of the game the user wants to play
+        """
+        main_menu = True
+        play_game = -1
+        self.draw_main_menu()
+        while main_menu:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONUP:
+                    position = pygame.mouse.get_pos()
+                    if self.rect_multi_player.collidepoint(position):
+                        main_menu = False
+                        play_game = 0
+                    elif self.rect_play_computer.collidepoint(position):
+                        main_menu = False
+                        play_game = 1
+                if event.type == pygame.QUIT:
+                    exit()
+        return play_game
+
+    def run_game(self, game_mode, player, game_status=False):
         """
         Function to check for events occurring inside the GUI screen
         Executes entire functioning of the game
+        :param game_mode:
         :param game_status: Represents whether the game is continuing
         :param player: Index of the player whose turn it is
         :return: nothing
