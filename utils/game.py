@@ -41,8 +41,9 @@ class Game:
         """
         valid_locations = []
         for col in range(BOARD_SIZE[1]):
-            if self.board[BOARD_SIZE[0] - 1][col] == 0:
-                valid_locations.append(col)
+            row = self.get_open_row(col)
+            if row != -1:
+                valid_locations.append((row, col))
         return valid_locations
 
     def is_winning_move(self, row, col, player):
