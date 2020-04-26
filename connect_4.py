@@ -1,9 +1,9 @@
-from utils.game_gui import *
+from utils.game_gui import GameGUI
 
 
 if __name__ == '__main__':
     # Initialize GUI screen and draw the game board on it
-    gui = Connect4GUI()
+    gui = GameGUI()
     gui.draw_board()
     # Initialize game-over parameter with False to start game
     game_over = False
