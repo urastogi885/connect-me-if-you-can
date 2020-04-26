@@ -13,8 +13,9 @@ BLACK = 0, 0, 0
 WHITE = 255, 255, 255
 YELLOW = 255, 255, 0
 # Define various players in the Game
-PLAYER = 0
-GAME_ROBOT = 1
+HUMAN_PLAYER = 0
+Q_ROBOT = 1
+RANDOM_ROBOT = 2
 # Define various rewards
 REWARD_WIN = 1
 REWARD_LOSS = -1
