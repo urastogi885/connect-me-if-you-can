@@ -4,8 +4,9 @@ from utils.constants import HUMAN_PLAYER, Q_ROBOT, RANDOM_ROBOT
 class Player:
     """
     A class to represent various types of players in the game
+    By default, it represents a human player
     """
-    def __init__(self, token):
+    def __init__(self, token=HUMAN_PLAYER + 1):
         """
         Initialize player with its token
         :param token: integer that represents the player on the board
@@ -51,18 +52,6 @@ class QPlayer(Player):
 
     def train(self, iterations):
         pass
-
-
-class HumanPlayer(Player):
-    """
-    A class that represents a human player
-    """
-    def __init__(self, token=HUMAN_PLAYER + 1):
-        """
-        Initialize the human player with its token
-        :param token: integer that represents the player on the board
-        """
-        Player.__init__(self, token)
 
 
 class RandomPlayer(Player):
