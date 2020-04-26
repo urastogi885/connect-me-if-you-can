@@ -21,3 +21,6 @@ REWARD_WIN = 1
 REWARD_LOSS = -1
 REWARD_DRAW = 0.5
 REWARD_NOTHING = 0
+# Define various modes of the game
+GAME_NAME = 'CONNECT-4'
+GAME_MODES = {0: '2 Players', 1: 'vs Computer'}
