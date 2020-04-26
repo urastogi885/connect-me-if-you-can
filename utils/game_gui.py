@@ -4,7 +4,10 @@ from utils.game import Game
 from utils.constants import *
 
 
-class Connect4GUI:
+class GameGUI:
+    """
+    A class that represents the GUI of the game
+    """
     def __init__(self):
         """
         Initialize the GUI
