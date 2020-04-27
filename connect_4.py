@@ -13,4 +13,4 @@ if __name__ == '__main__':
     # Play until somebody wins
     while not game_over:
         # Keep checking for events inside the game
-        game_over, player = gui.run_game(game_mode, player, game_over)
+        game_over, player = gui.run_game(game_mode, player, game_over, True)
