@@ -6,4 +6,4 @@ if __name__ == '__main__':
     gui = GameGUI()
     game_mode = gui.main_menu()
     gui.draw_board()
-    gui.run_game(game_mode, train=True)
+    gui.run_game(game_mode, train=True, train_mode=1)
