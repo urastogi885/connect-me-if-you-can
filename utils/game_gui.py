@@ -99,7 +99,6 @@ class GameGUI:
         :return: nothing
         """
         if game_mode == 0:
-            self.draw_board()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
