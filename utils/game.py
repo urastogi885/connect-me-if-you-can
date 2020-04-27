@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 from utils.constants import BOARD_SIZE
 
 
@@ -12,10 +13,20 @@ class Game:
         self.prev_state = None
 
     def update_current_state(self, board):
+        """
+        Method to update the current state of the board
+        :param board: board with the last added token
+        :return: a tuple of all the rows of the board
+        """
         self.current_state = tuple(map(tuple, board))
 
     def update_previous_state(self, state):
-        self.prev_state = state
+        """
+        Method to update the previous state of the board
+        :param state: old state of the board
+        :return: a tuple of all the rows of the board
+        """
+        self.prev_state = deepcopy(state)
 
     def add_player_token(self, row, col, player):
         """
