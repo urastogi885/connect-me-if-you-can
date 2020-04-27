@@ -71,7 +71,7 @@ class GameGUI:
     def main_menu(self):
         """
         Method to implement the logic behind the menu
-        :return: Mode of the game the user wants to play
+        :return: mode of the game the user wants to play
         """
         main_menu = True
         play_game = -1
@@ -90,14 +90,14 @@ class GameGUI:
                     exit()
         return play_game
 
-    def run_game(self, game_mode, game_status=False, train=False):
+    def run_game(self, game_mode, game_status=False, train=False, train_mode=0):
         """
         Function to check for events occurring inside the GUI screen
         Executes entire functioning of the game
-        :param game_mode:
-        :param game_status: Represents whether the game is continuing
-        # :param player: Index of the player whose turn it is
-        :param train: Set true is you want to train the robot
+        :param game_mode: mode of the game, i.e., multi-player or single-player
+        :param game_status: represents whether the game is continuing
+        :param train: set true is you want to train the robot
+        :param train_mode: type of agent to train with
         :return: nothing
         """
         if game_mode == 0:
@@ -146,40 +146,51 @@ class GameGUI:
         else:
             if train:
                 q_player = QPlayer(token=0)
-                # rand_player = RandomPlayer()
-                q_player1 = QPlayer(token=1, mem_location='memory/memory1.json')
-                for i in range(ITERATIONS):
-                    if i % 1000 == 0:
-                        q_player.save_memory()
-                        q_player1.save_memory('memory/memory1.json')
-                    player = choice((Q_ROBOT, Q_ROBOT + 1))
-                    while not game_status:
-                        for event in pygame.event.get():
-                            if event.type == pygame.QUIT:
-                                exit()
-                        possible_moves = self.game.get_valid_locations()
-                        reward = REWARD_NOTHING
-                        reward1 = REWARD_NOTHING
-                        # if player == RANDOM_ROBOT:
-                        #     move = q_player.make_move(possible_moves)
-                        #     self.game.add_player_token(move[0], move[1], rand_player.token)
+                if train_mode == LEARNING_MODES['random_agent']:
+                    pass
+                elif train_mode == LEARNING_MODES['trained_agent']:
+                    self.train_with_q_agent(q_player, game_status)
+                else:
+                    pass
+
+    def train_with_q_agent(self, learning_player, game_status):
+        """
+        Method to train the game robot using Q-learning
+        :param learning_player: object of the Q-Player class
+        :param game_status:
+        :return: nothing
+        """
+        trained_player = QPlayer(token=1, mem_location='memory/memory1.json')
+        for _ in range(100):
+            learning_player.save_memory()
+            trained_player.save_memory('memory/memory1.json')
+            for _ in range(ITERATIONS):
+                player = choice((Q_ROBOT, Q_ROBOT + 1))
+                while not game_status:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            exit()
+                    possible_moves = self.game.get_valid_locations()
+                    reward = REWARD_NOTHING
+                    reward1 = REWARD_NOTHING
+                    if player == Q_ROBOT:
+                        move = learning_player.get_optimal_move(self.game.current_state, possible_moves)
+                        self.game.add_player_token(move[0], move[1], learning_player.token)
+                    else:
+                        move = trained_player.get_optimal_move(self.game.current_state, possible_moves)
+                        self.game.add_player_token(move[0], move[1], trained_player.token)
+                    self.game.update_previous_state(self.game.current_state)
+                    self.game.update_current_state(self.game.board)
+                    if self.game.is_winning_move(move[0], move[1], player):
+                        game_status = True
                         if player == Q_ROBOT:
-                            move = q_player.get_optimal_move(self.game.current_state, possible_moves)
-                            self.game.add_player_token(move[0], move[1], q_player.token)
+                            reward, reward1 = REWARD_WIN, REWARD_LOSS
                         else:
-                            move = q_player1.get_optimal_move(self.game.current_state, possible_moves)
-                            self.game.add_player_token(move[0], move[1], q_player1.token)
-                        self.game.update_previous_state(self.game.current_state)
-                        self.game.update_current_state(self.game.board)
-                        if self.game.is_winning_move(move[0], move[1], player):
-                            game_status = True
-                            if player == Q_ROBOT:
-                                reward, reward1 = REWARD_WIN, REWARD_LOSS
-                            else:
-                                reward, reward1 = REWARD_LOSS, REWARD_WIN
-                        if self.game.is_draw():
-                            game_status = True
-                            reward, reward1 = REWARD_DRAW, REWARD_DRAW
-                        q_player.train(move, possible_moves, reward, self.game)
-                        q_player1.train(move, possible_moves, reward1, self.game)
-                        player = 3 - player
+                            reward, reward1 = REWARD_LOSS, REWARD_WIN
+                    if self.game.is_draw():
+                        game_status = True
+                        reward, reward1 = REWARD_DRAW, REWARD_DRAW
+                    learning_player.train(move, possible_moves, reward, self.game)
+                    trained_player.train(move, possible_moves, reward1, self.game)
+                    player = 3 - player
+
