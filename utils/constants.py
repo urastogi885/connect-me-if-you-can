@@ -26,3 +26,5 @@ GAME_NAME = 'CONNECT-4'
 GAME_MODES = {0: '2 Players', 1: 'vs Computer'}
 # Define location of memory file
 MEM_LOCATION = 'memory/memory.json'
+# Define variable to store no. of iterations to train the game robot
+ITERATIONS = 1000000
