@@ -146,26 +146,28 @@ class GameGUI:
         else:
             if train:
                 q_player = QPlayer(token=0)
-                if train_mode == LEARNING_MODES['random_agent']:
-                    pass
-                elif train_mode == LEARNING_MODES['trained_agent']:
-                    self.train_with_q_agent(q_player, game_status)
-                else:
-                    pass
+                self.train_with_agent(q_player, game_status, train_mode)
 
-    def train_with_q_agent(self, learning_player, game_status):
+    def train_with_agent(self, learning_player, game_status=False, trainer=0):
         """
         Method to train the game robot using Q-learning
         :param learning_player: object of the Q-Player class
-        :param game_status:
+        :param game_status: represents whether the game is continuing
+        :param trainer: type of agent to train the game robot
         :return: nothing
         """
-        trained_player = QPlayer(token=1, mem_location='memory/memory1.json')
+        if trainer:
+            trained_player = QPlayer(token=1, mem_location='memory/memory1.json')
+        else:
+            trained_player = RandomPlayer(token=1)
         for _ in range(100):
             learning_player.save_memory()
             trained_player.save_memory('memory/memory1.json')
             for _ in range(ITERATIONS):
-                player = choice((Q_ROBOT, Q_ROBOT + 1))
+                if trainer:
+                    player = choice((Q_ROBOT, Q_ROBOT + 1))
+                else:
+                    player = choice((Q_ROBOT, RANDOM_ROBOT))
                 while not game_status:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -177,7 +179,10 @@ class GameGUI:
                         move = learning_player.get_optimal_move(self.game.current_state, possible_moves)
                         self.game.add_player_token(move[0], move[1], learning_player.token)
                     else:
-                        move = trained_player.get_optimal_move(self.game.current_state, possible_moves)
+                        if trainer:
+                            move = trained_player.get_optimal_move(self.game.current_state, possible_moves)
+                        else:
+                            move = trained_player.make_move(possible_moves)
                         self.game.add_player_token(move[0], move[1], trained_player.token)
                     self.game.update_previous_state(self.game.current_state)
                     self.game.update_current_state(self.game.board)
@@ -191,6 +196,7 @@ class GameGUI:
                         game_status = True
                         reward, reward1 = REWARD_DRAW, REWARD_DRAW
                     learning_player.train(move, possible_moves, reward, self.game)
-                    trained_player.train(move, possible_moves, reward1, self.game)
+                    if trainer:
+                        trained_player.train(move, possible_moves, reward1, self.game)
                     player = 3 - player
 
