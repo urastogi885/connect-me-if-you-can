@@ -90,63 +90,70 @@ class GameGUI:
                     exit()
         return play_game
 
-    def run_game(self, game_mode, game_status=False, train=False, train_mode=0):
+    def run_game(self, game_mode, train=False, train_mode=0):
         """
         Function to check for events occurring inside the GUI screen
         Executes entire functioning of the game
         :param game_mode: mode of the game, i.e., multi-player or single-player
-        :param game_status: represents whether the game is continuing
         :param train: set true is you want to train the robot
         :param train_mode: type of agent to train with
         :return: nothing
         """
         if game_mode == 0:
-            player = choice((HUMAN_PLAYER, HUMAN_PLAYER + 1))
-            while not game_status:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        exit()
-                    elif event.type == pygame.MOUSEMOTION:
-                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
-                        col_index = int(event.pos[0] / CELL_SIZE)
-                        center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
-                        if player:
-                            pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                        else:
-                            pygame.draw.circle(self.screen, RED, center, RADIUS)
-                    elif event.type == pygame.MOUSEBUTTONUP:
-                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
-                        col_index = int(event.pos[0] / CELL_SIZE)
-                        row_index = self.game.get_open_row(col_index)
-                        center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
-                        if row_index != -1:
-                            center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
-                                      (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
-                            self.game.add_player_token(row_index, col_index, player)
-                        if player:
-                            pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                        else:
-                            pygame.draw.circle(self.screen, RED, center, RADIUS)
-                        if self.game.is_winning_move(row_index, col_index, player):
-                            if player:
-                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
-                            else:
-                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
-                            self.screen.blit(label, (40, 10))
-                            game_status = True
-                        if self.game.is_draw():
-                            self.screen.blit('GAME HAS TIED', True, WHITE)
-                            game_status = True
-                        if row_index != -1:
-                            player = (player + 1) % 2
-                    # Update GUI
-                    pygame.display.update()
-                    if game_status:
-                        pygame.time.wait(5000)
+            self.run_multi_player()
         else:
             if train:
                 q_player = QPlayer(token=0)
-                self.train_with_agent(q_player, game_status, train_mode)
+                self.train_with_agent(q_player, trainer=train_mode)
+
+    def run_multi_player(self, game_status=False):
+        """
+        Method to run multi-player (2 players') mode
+        :param game_status: set false to start the game
+        :return: nothing
+        """
+        player = choice((HUMAN_PLAYER, HUMAN_PLAYER + 1))
+        while not game_status:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit()
+                elif event.type == pygame.MOUSEMOTION:
+                    pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                    col_index = int(event.pos[0] / CELL_SIZE)
+                    center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
+                    if player:
+                        pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
+                    else:
+                        pygame.draw.circle(self.screen, RED, center, RADIUS)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                    col_index = int(event.pos[0] / CELL_SIZE)
+                    row_index = self.game.get_open_row(col_index)
+                    center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
+                    if row_index != -1:
+                        center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
+                                  (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
+                        self.game.add_player_token(row_index, col_index, player)
+                    if player:
+                        pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
+                    else:
+                        pygame.draw.circle(self.screen, RED, center, RADIUS)
+                    if self.game.is_winning_move(row_index, col_index, player):
+                        if player:
+                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
+                        else:
+                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
+                        self.screen.blit(label, (40, 10))
+                        game_status = True
+                    if self.game.is_draw():
+                        self.screen.blit('GAME HAS TIED', True, WHITE)
+                        game_status = True
+                    if row_index != -1:
+                        player = (player + 1) % 2
+                # Update GUI
+                pygame.display.update()
+                if game_status:
+                    pygame.time.wait(5000)
 
     def train_with_agent(self, learning_player, game_status=False, trainer=0):
         """
