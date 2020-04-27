@@ -1,5 +1,6 @@
 import random
 import json
+from numpy import ravel_multi_index
 from utils.constants import *
 
 
@@ -27,7 +28,7 @@ class QPlayer(Player):
     """
     A class that represents a Q-learning based AI player
     """
-    def __init__(self, token=Q_ROBOT + 1, alpha=0.3, gamma=0.9, epsilon=0.2):
+    def __init__(self, token=Q_ROBOT + 1, alpha=0.3, gamma=0.9, epsilon=0.2, mem_location=MEM_LOCATION):
         """
         Initialize the player with its token, learning rate, discount factor, and exploration chance
         :param token: integer that represents the player on the board
@@ -40,6 +41,7 @@ class QPlayer(Player):
         self.learning_rate = alpha
         self.exploration_chance = epsilon
         self.q_value = {}
+        self.load_memory(mem_location)
 
     def load_memory(self, file_location=MEM_LOCATION):
         with open(file_location, 'r') as memory:
@@ -73,10 +75,14 @@ class QPlayer(Player):
         :param move: Action done on the state
         :return: Q-value of the given state-action pair
         """
+        # Convert move into an index
+        move = ravel_multi_index(move, dims=BOARD_SIZE)
+        # Convert state-action pair into a string
+        key = str((state, move))
         # Check if the state-action pair exists
-        if self.q_value.get((state, move)) is None:
-            self.q_value[(state, move)] = 1.0
-        return self.q_value.get((state, move))
+        if self.q_value.get(key) is None:
+            self.q_value[key] = 1.0
+        return self.q_value.get(key)
 
     def calc_q_value(self, reward, prev_q_value, max_q_value):
         """
@@ -114,7 +120,8 @@ class QPlayer(Player):
         # Get the maximum Q-value of the current state of the game
         max_q_value, _ = self.get_max_q_value(game.current_state, valid_moves)
         # Update Q-value of the state-action pair
-        self.q_value[(game.current_state, move)] = self.calc_q_value(reward, prev_q_value, max_q_value)
+        move = ravel_multi_index(move, dims=BOARD_SIZE)
+        self.q_value[str((game.current_state, move))] = self.calc_q_value(reward, prev_q_value, max_q_value)
 
 
 class RandomPlayer(Player):
