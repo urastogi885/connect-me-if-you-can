@@ -8,8 +8,14 @@ class Game:
         Initialize the game class with an empty board
         """
         self.board = np.zeros(BOARD_SIZE, dtype=np.int8)
-        self.current_state = self.board.tolist()
-        self.prev_state = self.board.tolist()
+        self.current_state = tuple(map(tuple, self.board))
+        self.prev_state = None
+
+    def update_current_state(self, board):
+        self.current_state = tuple(map(tuple, board))
+
+    def update_previous_state(self, state):
+        self.prev_state = state
 
     def add_player_token(self, row, col, player):
         """
