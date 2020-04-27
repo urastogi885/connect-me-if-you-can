@@ -1,6 +1,8 @@
 import pygame
+from random import choice
 from sys import exit
 from utils.game import Game
+from utils.player import *
 from utils.constants import *
 
 
@@ -88,59 +90,96 @@ class GameGUI:
                     exit()
         return play_game
 
-    def run_game(self, game_mode, player, game_status=False, train=False):
+    def run_game(self, game_mode, game_status=False, train=False):
         """
         Function to check for events occurring inside the GUI screen
         Executes entire functioning of the game
         :param game_mode:
         :param game_status: Represents whether the game is continuing
-        :param player: Index of the player whose turn it is
+        # :param player: Index of the player whose turn it is
         :param train: Set true is you want to train the robot
         :return: nothing
         """
         if game_mode == 0:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-                elif event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
-                    col_index = int(event.pos[0] / CELL_SIZE)
-                    center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
-                    if player:
-                        pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                    else:
-                        pygame.draw.circle(self.screen, RED, center, RADIUS)
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
-                    col_index = int(event.pos[0] / CELL_SIZE)
-                    row_index = self.game.get_open_row(col_index)
-                    center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
-                    if row_index != -1:
-                        center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
-                                  (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
-                        self.game.add_player_token(row_index, col_index, player)
-                    if player:
-                        pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                    else:
-                        pygame.draw.circle(self.screen, RED, center, RADIUS)
-                    if self.game.is_winning_move(row_index, col_index, player):
+            player = choice((HUMAN_PLAYER, HUMAN_PLAYER + 1))
+            while not game_status:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        exit()
+                    elif event.type == pygame.MOUSEMOTION:
+                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                        col_index = int(event.pos[0] / CELL_SIZE)
+                        center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
                         if player:
-                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
+                            pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
                         else:
-                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
-                        self.screen.blit(label, (40, 10))
-                        game_status = True
-                    if self.game.is_draw():
-                        self.screen.blit('GAME HAS TIED', True, WHITE)
-                        game_status = True
-                    if row_index != -1:
-                        player = (player + 1) % 2
-                # Update GUI
-                pygame.display.update()
-                if game_status:
-                    pygame.time.wait(5000)
+                            pygame.draw.circle(self.screen, RED, center, RADIUS)
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                        col_index = int(event.pos[0] / CELL_SIZE)
+                        row_index = self.game.get_open_row(col_index)
+                        center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
+                        if row_index != -1:
+                            center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
+                                      (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
+                            self.game.add_player_token(row_index, col_index, player)
+                        if player:
+                            pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
+                        else:
+                            pygame.draw.circle(self.screen, RED, center, RADIUS)
+                        if self.game.is_winning_move(row_index, col_index, player):
+                            if player:
+                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
+                            else:
+                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
+                            self.screen.blit(label, (40, 10))
+                            game_status = True
+                        if self.game.is_draw():
+                            self.screen.blit('GAME HAS TIED', True, WHITE)
+                            game_status = True
+                        if row_index != -1:
+                            player = (player + 1) % 2
+                    # Update GUI
+                    pygame.display.update()
+                    if game_status:
+                        pygame.time.wait(5000)
         else:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-        return game_status, player
+            if train:
+                q_player = QPlayer(token=0)
+                # rand_player = RandomPlayer()
+                q_player1 = QPlayer(token=1, mem_location='memory/memory1.json')
+                for i in range(ITERATIONS):
+                    if i % 1000 == 0:
+                        q_player.save_memory()
+                        q_player1.save_memory('memory/memory1.json')
+                    player = choice((Q_ROBOT, Q_ROBOT + 1))
+                    while not game_status:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                exit()
+                        possible_moves = self.game.get_valid_locations()
+                        reward = REWARD_NOTHING
+                        reward1 = REWARD_NOTHING
+                        # if player == RANDOM_ROBOT:
+                        #     move = q_player.make_move(possible_moves)
+                        #     self.game.add_player_token(move[0], move[1], rand_player.token)
+                        if player == Q_ROBOT:
+                            move = q_player.get_optimal_move(self.game.current_state, possible_moves)
+                            self.game.add_player_token(move[0], move[1], q_player.token)
+                        else:
+                            move = q_player1.get_optimal_move(self.game.current_state, possible_moves)
+                            self.game.add_player_token(move[0], move[1], q_player1.token)
+                        self.game.update_previous_state(self.game.current_state)
+                        self.game.update_current_state(self.game.board)
+                        if self.game.is_winning_move(move[0], move[1], player):
+                            game_status = True
+                            if player == Q_ROBOT:
+                                reward, reward1 = REWARD_WIN, REWARD_LOSS
+                            else:
+                                reward, reward1 = REWARD_LOSS, REWARD_WIN
+                        if self.game.is_draw():
+                            game_status = True
+                            reward, reward1 = REWARD_DRAW, REWARD_DRAW
+                        q_player.train(move, possible_moves, reward, self.game)
+                        q_player1.train(move, possible_moves, reward1, self.game)
+                        player = 3 - player
