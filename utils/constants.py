@@ -24,6 +24,8 @@ REWARD_NOTHING = 0
 # Define various modes of the game
 GAME_NAME = 'CONNECT-4'
 GAME_MODES = {0: '2 Players', 1: 'vs Computer'}
+# Define various modes of learning
+LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minmax_agent': 2}
 # Define location of memory file
 MEM_LOCATION = 'memory/memory.json'
 # Define variable to store no. of iterations to train the game robot
