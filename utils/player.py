@@ -28,7 +28,7 @@ class QPlayer(Player):
     """
     A class that represents a Q-learning based AI player
     """
-    def __init__(self, token=Q_ROBOT + 1, alpha=0.3, gamma=0.9, epsilon=0.2, mem_location=MEM_LOCATION):
+    def __init__(self, token=Q_ROBOT + 1, alpha=0.6, gamma=0.9, epsilon=0.9, mem_location=MEM_LOCATION):
         """
         Initialize the player with its token, learning rate, discount factor, and exploration chance
         :param token: integer that represents the player on the board
