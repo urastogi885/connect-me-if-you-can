@@ -102,9 +102,77 @@ class GameGUI:
         if game_mode == 0:
             self.run_multi_player()
         else:
+            self.run_single_player()
             if train:
                 q_player = QPlayer(token=0)
                 self.train_with_agent(q_player, trainer=train_mode)
+
+    def run_single_player(self, game_status=False):
+        q_player = QPlayer(epsilon=0.2)
+        player = choice((HUMAN_PLAYER, Q_ROBOT))
+        while not game_status:
+            reward = REWARD_NOTHING
+            if not player:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        exit()
+                    elif event.type == pygame.MOUSEMOTION:
+                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                        col_index = int(event.pos[0] / CELL_SIZE)
+                        center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
+                        pygame.draw.circle(self.screen, RED, center, RADIUS)
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                        col_index = int(event.pos[0] / CELL_SIZE)
+                        row_index = self.game.get_open_row(col_index)
+                        if row_index != -1:
+                            center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
+                                      (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
+                            possible_moves = self.game.get_valid_locations()
+                            self.game.update_previous_state(self.game.current_state)
+                            self.game.add_player_token(row_index, col_index, player)
+                            self.game.update_current_state(self.game.board)
+                            pygame.draw.circle(self.screen, RED, center, RADIUS)
+                            if self.game.is_winning_move(row_index, col_index, player):
+                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
+                                self.screen.blit(label, (40, 10))
+                                reward = REWARD_LOSS
+                                game_status = True
+                            if self.game.is_draw():
+                                self.screen.blit('GAME HAS TIED', True, WHITE)
+                                reward = REWARD_DRAW
+                                game_status = True
+                            # Update turn of player
+                            player = (player + 1) % 2
+                            q_player.train((row_index, col_index), possible_moves, reward, self.game)
+            else:
+                possible_moves = self.game.get_valid_locations()
+                move = q_player.get_optimal_move(self.game.current_state, possible_moves)
+                pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
+                center = ((move[1] * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
+                pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
+                # Update GUI and wait for some time
+                pygame.display.update()
+                pygame.time.wait(500)
+                # Get center of the token location on the board and draw a circle there
+                center = (((move[1] * CELL_SIZE) + (CELL_SIZE // 2)),
+                          (((BOARD_SIZE[0] - move[0]) * CELL_SIZE) + (CELL_SIZE // 2)))
+                pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
+                self.game.update_previous_state(self.game.current_state)
+                self.game.add_player_token(move[0], move[1], player)
+                self.game.update_current_state(self.game.board)
+                if self.game.is_winning_move(move[0], move[1], player):
+                    reward = REWARD_WIN
+                    game_status = True
+                if self.game.is_draw():
+                    reward = REWARD_DRAW
+                    game_status = True
+                q_player.train(move, possible_moves, reward, self.game)
+                player = (player + 1) % 2
+            # Update GUI
+            pygame.display.update()
+            if game_status:
+                pygame.time.wait(5000)
 
     def run_multi_player(self, game_status=False):
         """
@@ -129,31 +197,30 @@ class GameGUI:
                     pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
                     col_index = int(event.pos[0] / CELL_SIZE)
                     row_index = self.game.get_open_row(col_index)
-                    center = ((col_index * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
                     if row_index != -1:
                         center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
                                   (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
                         self.game.add_player_token(row_index, col_index, player)
-                    if player:
-                        pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                    else:
-                        pygame.draw.circle(self.screen, RED, center, RADIUS)
-                    if self.game.is_winning_move(row_index, col_index, player):
                         if player:
-                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
+                            pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
                         else:
-                            label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
-                        self.screen.blit(label, (40, 10))
-                        game_status = True
-                    if self.game.is_draw():
-                        self.screen.blit('GAME HAS TIED', True, WHITE)
-                        game_status = True
-                    if row_index != -1:
+                            pygame.draw.circle(self.screen, RED, center, RADIUS)
+                        if self.game.is_winning_move(row_index, col_index, player):
+                            if player:
+                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, YELLOW)
+                            else:
+                                label = self.font.render('Player ' + str(player + 1) + ' Wins!', True, RED)
+                            self.screen.blit(label, (40, 10))
+                            game_status = True
+                        if self.game.is_draw():
+                            self.screen.blit('GAME HAS TIED', True, WHITE)
+                            game_status = True
+                        # Update turn of player
                         player = (player + 1) % 2
                 # Update GUI
                 pygame.display.update()
                 if game_status:
-                    pygame.time.wait(5000)
+                    pygame.time.wait(3000)
 
     def train_with_agent(self, learning_player, game_status=False, trainer=0):
         """
