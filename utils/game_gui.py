@@ -102,10 +102,11 @@ class GameGUI:
         if game_mode == 0:
             self.run_multi_player()
         else:
-            self.run_single_player()
             if train:
-                q_player = QPlayer(token=0)
+                q_player = QPlayer()
                 self.train_with_agent(q_player, trainer=train_mode)
+            else:
+                self.run_single_player()
 
     def run_single_player(self, game_status=False):
         q_player = QPlayer(epsilon=0.2)
@@ -232,12 +233,13 @@ class GameGUI:
         :return: nothing
         """
         if trainer:
-            trained_player = QPlayer(token=1, mem_location='memory/memory1.json')
+            trained_player = QPlayer(token=0, mem_location='memory/memory1.json')
         else:
-            trained_player = RandomPlayer(token=1)
+            trained_player = RandomPlayer(token=0)
         for _ in range(100):
             learning_player.save_memory()
-            trained_player.save_memory('memory/memory1.json')
+            if trainer:
+                trained_player.save_memory('memory/memory1.json')
             for _ in range(ITERATIONS):
                 if trainer:
                     player = choice((Q_ROBOT, Q_ROBOT + 1))
