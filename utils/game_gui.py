@@ -172,6 +172,7 @@ class GameGUI:
             # Update GUI
             pygame.display.update()
             if game_status:
+                q_player.save_memory()
                 pygame.time.wait(5000)
 
     def run_multi_player(self, game_status=False):
