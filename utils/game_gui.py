@@ -110,8 +110,11 @@ class GameGUI:
     def run_single_player(self, game_status=False):
         q_player = QPlayer(epsilon=0.2)
         player = choice((HUMAN_PLAYER, Q_ROBOT))
+        reward = REWARD_NOTHING
+        current_board = self.game.current_state
+        possible_moves = self.game.get_valid_locations(current_board)
+        q_player.train(possible_moves, reward, player, self.game)
         while not game_status:
-            reward = REWARD_NOTHING
             if not player:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -124,12 +127,10 @@ class GameGUI:
                     elif event.type == pygame.MOUSEBUTTONUP:
                         pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
                         col_index = int(event.pos[0] / CELL_SIZE)
-                        row_index = self.game.get_open_row(col_index)
+                        row_index = self.game.get_open_row(col_index, self.game.current_state)
                         if row_index != -1:
                             center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
                                       (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
-                            possible_moves = self.game.get_valid_locations()
-                            self.game.update_previous_state(self.game.current_state)
                             self.game.add_player_token(row_index, col_index, player)
                             self.game.update_current_state(self.game.board)
                             pygame.draw.circle(self.screen, RED, center, RADIUS)
@@ -144,13 +145,8 @@ class GameGUI:
                                 game_status = True
                             # Update turn of player
                             player = (player + 1) % 2
-                            possible_moves = self.game.get_valid_locations()
-                            possible_states = self.game.get_possible_states(possible_moves, player)
-                            q_player.train((row_index, col_index), possible_moves, possible_states, reward, self.game)
             else:
-                possible_moves = self.game.get_valid_locations()
-                possible_states = self.game.get_possible_states(possible_moves, q_player.token)
-                move = q_player.get_optimal_move(possible_states, possible_moves)
+                move = q_player.get_optimal_move(current_board, possible_moves)
                 pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
                 center = ((move[1] * CELL_SIZE) + (CELL_SIZE // 2)), (CELL_SIZE // 2)
                 pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
@@ -161,7 +157,6 @@ class GameGUI:
                 center = (((move[1] * CELL_SIZE) + (CELL_SIZE // 2)),
                           (((BOARD_SIZE[0] - move[0]) * CELL_SIZE) + (CELL_SIZE // 2)))
                 pygame.draw.circle(self.screen, YELLOW, center, RADIUS)
-                self.game.update_previous_state(self.game.current_state)
                 self.game.add_player_token(move[0], move[1], player)
                 self.game.update_current_state(self.game.board)
                 if self.game.is_winning_move(move[0], move[1], player):
@@ -170,12 +165,13 @@ class GameGUI:
                 if self.game.is_draw():
                     reward = REWARD_DRAW
                     game_status = True
-                possible_moves = self.game.get_valid_locations()
-                possible_states = self.game.get_possible_states(possible_moves, q_player.token)
-                q_player.train(move, possible_moves, possible_states, reward, self.game)
                 player = (player + 1) % 2
             # Update GUI
             pygame.display.update()
+            # Train the computer player
+            current_board = self.game.current_state
+            possible_moves = self.game.get_valid_locations(current_board)
+            q_player.train(possible_moves, reward, player, self.game)
             if game_status:
                 q_player.save_memory()
                 pygame.time.wait(5000)
@@ -202,7 +198,7 @@ class GameGUI:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pygame.draw.rect(self.screen, BLACK, (0, 0, GUI_SIZE[1], CELL_SIZE))
                     col_index = int(event.pos[0] / CELL_SIZE)
-                    row_index = self.game.get_open_row(col_index)
+                    row_index = self.game.get_open_row(col_index, self.game.current_state)
                     if row_index != -1:
                         center = (((col_index * CELL_SIZE) + (CELL_SIZE // 2)),
                                   (((BOARD_SIZE[0] - row_index) * CELL_SIZE) + (CELL_SIZE // 2)))
@@ -240,7 +236,8 @@ class GameGUI:
             trained_player = QPlayer(token=0, mem_location='memory/memory1.json')
         else:
             trained_player = RandomPlayer(token=0)
-        for _ in range(100):
+        for i in range(100):
+            print(i)
             learning_player.save_memory()
             if trainer:
                 trained_player.save_memory('memory/memory1.json')
@@ -251,39 +248,40 @@ class GameGUI:
                     player = choice((Q_ROBOT, RANDOM_ROBOT))
                 reward = REWARD_NOTHING
                 reward1 = REWARD_NOTHING
+                current_board = self.game.current_state
+                possible_moves = self.game.get_valid_locations(current_board)
+                learning_player.train(possible_moves, reward, learning_player.token, self.game)
+                if trainer:
+                    trained_player.train(possible_moves, reward1, trained_player.token, self.game)
                 while not game_status:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             exit()
-                    possible_moves = self.game.get_valid_locations()
                     if player == Q_ROBOT:
-                        possible_states = self.game.get_possible_states(possible_moves, learning_player.token)
-                        move = learning_player.get_optimal_move(possible_states, possible_moves)
+                        move = learning_player.get_optimal_move(current_board, possible_moves)
                         self.game.add_player_token(move[0], move[1], learning_player.token)
                     else:
                         if trainer:
-                            possible_states = self.game.get_possible_states(possible_moves, trained_player.token)
-                            move = trained_player.get_optimal_move(possible_states, possible_moves)
+                            move = trained_player.get_optimal_move(current_board, possible_moves)
                         else:
                             move = trained_player.make_move(possible_moves)
                         self.game.add_player_token(move[0], move[1], trained_player.token)
                     self.game.update_current_state(self.game.board)
-                    if self.game.is_winning_move(move[0], move[1], player):
-                        game_status = True
-                        if player == Q_ROBOT:
+                    if player == Q_ROBOT:
+                        if self.game.is_winning_move(move[0], move[1], learning_player.token):
+                            game_status = True
                             reward, reward1 = REWARD_WIN, REWARD_LOSS
-                        else:
+                    else:
+                        if self.game.is_winning_move(move[0], move[1], trained_player.token):
+                            game_status = True
                             reward, reward1 = REWARD_LOSS, REWARD_WIN
                     if self.game.is_draw():
                         game_status = True
                         reward, reward1 = REWARD_DRAW, REWARD_DRAW
-                    possible_moves = self.game.get_valid_locations()
-                    if player == Q_ROBOT:
-                        possible_states = self.game.get_possible_states(possible_moves, trained_player.token)
-                    else:
-                        possible_states = self.game.get_possible_states(possible_moves, learning_player.token)
-                    learning_player.train(move, possible_moves, possible_states, reward, self.game)
-                    if trainer:
-                        trained_player.train(move, possible_moves, possible_states, reward1, self.game)
                     player = 3 - player
-
+                    # Train the Q-learning players
+                    current_board = self.game.current_state
+                    possible_moves = self.game.get_valid_locations(current_board)
+                    learning_player.train(possible_moves, reward, learning_player.token, self.game)
+                    if trainer:
+                        trained_player.train(possible_moves, reward1, trained_player.token, self.game)
