@@ -76,14 +76,16 @@ class QPlayer(Player):
         :return: Q-value of the given state-action pair
         """
         # Convert move into an index
-        move = ravel_multi_index(move, dims=BOARD_SIZE)
+        move = str(ravel_multi_index(move, dims=BOARD_SIZE))
         # Convert state-action pair into a string
-        state_tuple = tuple(map(tuple, state))
-        key = str((state_tuple, move))
+        key = str(tuple(map(tuple, state)))
         # Check if the state-action pair exists
         if self.q_value.get(key) is None:
-            self.q_value[key] = 1.0
-        return self.q_value[key]
+            self.q_value[key] = {move: 1.0}
+        else:
+            if self.q_value[key].get(move) is None:
+                self.q_value[key][move] = 1.0
+        return self.q_value[key][move]
 
     def calc_q_value(self, reward, prev_q_value, max_q_value):
         """
