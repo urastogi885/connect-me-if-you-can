@@ -16,6 +16,7 @@ YELLOW = 255, 255, 0
 HUMAN_PLAYER = 0
 Q_ROBOT = 1
 RANDOM_ROBOT = 2
+MINMAX_ROBOT = 3
 # Define various rewards
 REWARD_WIN = 1
 REWARD_LOSS = -1
@@ -29,4 +30,4 @@ LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minmax_agent': 2}
 # Define location of memory file
 MEM_LOCATION = 'memory/memory.json'
 # Define variable to store no. of iterations to train the game robot
-ITERATIONS = 1000000
+ITERATIONS = 10000
