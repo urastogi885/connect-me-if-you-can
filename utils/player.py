@@ -9,7 +9,7 @@ class Player:
     A class to represent various types of players in the game
     By default, it represents a human player
     """
-    def __init__(self, token=HUMAN_PLAYER + 1):
+    def __init__(self, token=HUMAN_PLAYER):
         """
         Initialize player with its token
         :param token: integer that represents the player on the board
@@ -28,7 +28,7 @@ class QPlayer(Player):
     """
     A class that represents a Q-learning based AI player
     """
-    def __init__(self, token=Q_ROBOT + 1, alpha=0.6, gamma=0.9, epsilon=0.9, mem_location=MEM_LOCATION):
+    def __init__(self, token=Q_ROBOT, alpha=0.9, gamma=0.75, epsilon=0.9, mem_location=MEM_LOCATION):
         """
         Initialize the player with its token, learning rate, discount factor, and exploration chance
         :param token: integer that represents the player on the board
@@ -78,11 +78,12 @@ class QPlayer(Player):
         # Convert move into an index
         move = ravel_multi_index(move, dims=BOARD_SIZE)
         # Convert state-action pair into a string
-        key = str((state, move))
+        state_tuple = tuple(map(tuple, state))
+        key = str((state_tuple, move))
         # Check if the state-action pair exists
         if self.q_value.get(key) is None:
             self.q_value[key] = 1.0
-        return self.q_value.get(key)
+        return self.q_value[key]
 
     def calc_q_value(self, reward, prev_q_value, max_q_value):
         """
@@ -95,30 +96,31 @@ class QPlayer(Player):
         # Apply the Bellman's equation
         return prev_q_value + self.learning_rate * (reward + (self.discount_factor * max_q_value) - prev_q_value)
 
-    def get_max_q_value(self, current_state, moves):
+    def get_max_q_value(self, next_states, moves):
         """
         Method to get the maximum Q-value of the current state of the board
-        :param current_state: a tuple containing the current state of the board
+        :param next_states: a list of possible state of the board w.r.t each of the possible moves
         :param moves: a list of possible moves on the board
         :return: maximum Q-value of the current state of the board and list of all Q-values
         """
         # Generate a list of Q-values for each state-action pair
-        q_values = [self.get_q_value(current_state, i) for i in moves]
+        q_values = [self.get_q_value(next_states[i], moves[i]) for i in range(len(moves))]
         return max(q_values), q_values
 
-    def train(self, move, valid_moves, reward, game):
+    def train(self, move, valid_moves, next_states, reward, game):
         """
         Method to train the robot of the game using Q-Learning
         :param move: move made on the board
         :param valid_moves: a list of possible moves on the board
+        :param next_states: a list of possible state of the board w.r.t each of the possible moves
         :param reward: reward based on the current status of the board
         :param game: an instance of the Game class
         :return: nothing
         """
         # Get the Q-value of the previous state of the game
-        prev_q_value = self.get_q_value(game.prev_state, move)
+        prev_q_value = self.get_q_value(game.current_state, move)
         # Get the maximum Q-value of the current state of the game
-        max_q_value, _ = self.get_max_q_value(game.current_state, valid_moves)
+        max_q_value, _ = self.get_max_q_value(next_states, valid_moves)
         # Update Q-value of the state-action pair
         move = ravel_multi_index(move, dims=BOARD_SIZE)
         self.q_value[str((game.current_state, move))] = self.calc_q_value(reward, prev_q_value, max_q_value)
@@ -129,7 +131,7 @@ class RandomPlayer(Player):
     A class that represents a player that picks moves randomly
     """
 
-    def __init__(self, token=RANDOM_ROBOT + 1):
+    def __init__(self, token=RANDOM_ROBOT):
         """
         Initialize the human player with its token
         :param token: integer that represents the player on the board
@@ -142,3 +144,15 @@ class RandomPlayer(Player):
         :return: a tuple containing location of the token to be placed
         """
         return random.choice(valid_moves)
+
+
+class MinMaxPlayer(Player):
+    """
+    A class that represents a player trained using the MinMax algorithm
+    """
+    def __init__(self, token=MINMAX_ROBOT):
+        """
+        Initialize the min-max player with its token
+        :param token: integer that represents the player on the board
+        """
+        self.token = token
