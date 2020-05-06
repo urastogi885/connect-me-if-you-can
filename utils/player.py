@@ -1,6 +1,7 @@
 import random
 import json
 from numpy import ravel_multi_index
+from copy import deepcopy
 from utils.constants import *
 
 
@@ -53,6 +54,10 @@ class QPlayer(Player):
             json.dump(self.q_value, memory, indent=2)
         memory.close()
 
+    @staticmethod
+    def get_key(state):
+        return str(tuple(map(tuple, state)))
+
     def get_optimal_move(self, current_state, moves):
         # Allow the robot to explore random moves
         if random.random() < self.exploration_chance:
@@ -78,7 +83,7 @@ class QPlayer(Player):
         # Convert move into an index
         move = str(ravel_multi_index(move, dims=BOARD_SIZE))
         # Convert state-action pair into a string
-        key = str(tuple(map(tuple, state)))
+        key = self.get_key(state)
         # Check if the state-action pair exists
         if self.q_value.get(key) is None:
             self.q_value[key] = {move: 1.0}
@@ -98,7 +103,7 @@ class QPlayer(Player):
         # Apply the Bellman's equation
         return prev_q_value + self.learning_rate * (reward + (self.discount_factor * max_q_value) - prev_q_value)
 
-    def get_max_q_value(self, next_states, moves):
+    def get_max_q_value(self, state, moves):
         """
         Method to get the maximum Q-value of the current state of the board
         :param next_states: a list of possible state of the board w.r.t each of the possible moves
@@ -106,10 +111,10 @@ class QPlayer(Player):
         :return: maximum Q-value of the current state of the board and list of all Q-values
         """
         # Generate a list of Q-values for each state-action pair
-        q_values = [self.get_q_value(next_states[i], moves[i]) for i in range(len(moves))]
+        q_values = [self.get_q_value(state, move) for move in moves]
         return max(q_values), q_values
 
-    def train(self, move, valid_moves, next_states, reward, game):
+    def train(self, valid_moves, reward, player, game):
         """
         Method to train the robot of the game using Q-Learning
         :param move: move made on the board
@@ -119,13 +124,18 @@ class QPlayer(Player):
         :param game: an instance of the Game class
         :return: nothing
         """
-        # Get the Q-value of the previous state of the game
-        prev_q_value = self.get_q_value(game.current_state, move)
-        # Get the maximum Q-value of the current state of the game
-        max_q_value, _ = self.get_max_q_value(next_states, valid_moves)
-        # Update Q-value of the state-action pair
-        move = ravel_multi_index(move, dims=BOARD_SIZE)
-        self.q_value[str((game.current_state, move))] = self.calc_q_value(reward, prev_q_value, max_q_value)
+        for move in valid_moves:
+            current_state = deepcopy(game.current_state)
+            # Get the Q-value of the previous state of the game
+            prev_q_value = self.get_q_value(current_state, move)
+            next_state = deepcopy(game.current_state)
+            next_state[move[0]][move[1]] = player + 1
+            next_moves = game.get_valid_locations(next_state)
+            # Get the maximum Q-value of the current state of the game
+            max_q_value, _ = self.get_max_q_value(next_state, next_moves)
+            # Update Q-value of the state-action pair
+            move = str(ravel_multi_index(move, dims=BOARD_SIZE))
+            self.q_value[self.get_key(current_state)][move] = self.calc_q_value(reward, prev_q_value, max_q_value)
 
 
 class RandomPlayer(Player):
