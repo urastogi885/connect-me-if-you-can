@@ -65,6 +65,14 @@ class Game:
                 valid_locations.append((row, col))
         return valid_locations
 
+    def get_possible_states(self, possible_moves, player):
+        possible_states = []
+        for move in possible_moves:
+            state = deepcopy(self.board)
+            state[move[0]][move[1]] = player + 1
+            possible_states.append(state)
+        return possible_states
+
     def is_winning_move(self, row, col, player):
         """
         Method to check is the last move by a player wins the game
