@@ -9,7 +9,7 @@ class Game:
         Initialize the game class with an empty board
         """
         self.board = np.zeros(BOARD_SIZE, dtype=np.int8)
-        self.current_state = tuple(map(tuple, self.board))
+        self.current_state = deepcopy(self.board)
         self.prev_state = None
 
     def update_current_state(self, board):
@@ -18,15 +18,7 @@ class Game:
         :param board: board with the last added token
         :return: a tuple of all the rows of the board
         """
-        self.current_state = tuple(map(tuple, board))
-
-    def update_previous_state(self, state):
-        """
-        Method to update the previous state of the board
-        :param state: old state of the board
-        :return: a tuple of all the rows of the board
-        """
-        self.prev_state = deepcopy(state)
+        self.current_state = deepcopy(board)
 
     def add_player_token(self, row, col, player):
         """
@@ -39,28 +31,30 @@ class Game:
         # Add token of the player in the given row-column
         self.board[row][col] = player + 1
 
-    def get_open_row(self, col):
+    @staticmethod
+    def get_open_row(col, board):
         """
         Method to get the lower-most empty row on the board in a column
         :param col: column on the board to find the empty row
+        :param board:
         :return: index of the lower-most row in the given column
         """
         # Iterate through the rows of the given column
         for row in range(BOARD_SIZE[0]):
-            if self.board[row][col] == 0:
+            if board[row][col] == 0:
                 # Return the index of the lower-most empty row
                 return row
         # Return -1 if none of the rows in the given column on the board is empty
         return -1
 
-    def get_valid_locations(self):
+    def get_valid_locations(self, board):
         """
         Method to get all the open columns
         :return: a list of open column indices
         """
         valid_locations = []
         for col in range(BOARD_SIZE[1]):
-            row = self.get_open_row(col)
+            row = self.get_open_row(col, board)
             if row != -1:
                 valid_locations.append((row, col))
         return valid_locations
