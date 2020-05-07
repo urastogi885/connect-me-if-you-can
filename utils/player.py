@@ -117,10 +117,9 @@ class QPlayer(Player):
     def train(self, valid_moves, reward, player, game):
         """
         Method to train the robot of the game using Q-Learning
-        :param move: move made on the board
         :param valid_moves: a list of possible moves on the board
-        :param next_states: a list of possible state of the board w.r.t each of the possible moves
         :param reward: reward based on the current status of the board
+        :param player: ID of the player to train
         :param game: an instance of the Game class
         :return: nothing
         """
@@ -131,11 +130,12 @@ class QPlayer(Player):
             next_state = deepcopy(game.current_state)
             next_state[move[0]][move[1]] = player + 1
             next_moves = game.get_valid_locations(next_state)
-            # Get the maximum Q-value of the current state of the game
-            max_q_value, _ = self.get_max_q_value(next_state, next_moves)
-            # Update Q-value of the state-action pair
-            move = str(ravel_multi_index(move, dims=BOARD_SIZE))
-            self.q_value[self.get_key(current_state)][move] = self.calc_q_value(reward, prev_q_value, max_q_value)
+            if len(next_moves):
+                # Get the maximum Q-value of the current state of the game
+                max_q_value, _ = self.get_max_q_value(next_state, next_moves)
+                # Update Q-value of the state-action pair
+                move = str(ravel_multi_index(move, dims=BOARD_SIZE))
+                self.q_value[self.get_key(current_state)][move] = self.calc_q_value(reward, prev_q_value, max_q_value)
 
 
 class RandomPlayer(Player):
