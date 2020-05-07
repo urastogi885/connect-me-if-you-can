@@ -30,4 +30,4 @@ LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minmax_agent': 2}
 # Define location of memory file
 MEM_LOCATION = 'memory/memory.json'
 # Define variable to store no. of iterations to train the game robot
-ITERATIONS = 10000
+ITERATIONS = 500
