@@ -1,6 +1,7 @@
 import pygame
 from random import choice
 from sys import exit
+import matplotlib.pyplot as plt
 from utils.game import Game
 from utils.player import *
 from utils.constants import *
@@ -224,14 +225,16 @@ class GameGUI:
                 if game_status:
                     pygame.time.wait(3000)
 
-    def train_with_agent(self, game_status=False, trainer=0):
+    def train_with_agent(self, trainer=0):
         """
         Method to train the game robot using Q-learning
-        :param game_status: represents whether the game is continuing
         :param trainer: type of agent to train the game robot
         :return: nothing
         """
-        learning_player = QPlayer(epsilon=1.0)
+        player_win_data, agent_win_data, player_moves, agent_moves = [0], [0], [0], [0]
+        draw = [0]
+        x = list(range(0, (100 * ITERATIONS) + 1, 500))
+        learning_player = QPlayer(epsilon=0.6)
         if trainer:
             trained_player = QPlayer(token=0, mem_location='memory/memory1.json')
         else:
@@ -241,13 +244,28 @@ class GameGUI:
             learning_player.save_memory()
             if trainer:
                 trained_player.save_memory('memory/memory1.json')
-            for _ in range(ITERATIONS):
-                if trainer:
-                    player = choice((Q_ROBOT, Q_ROBOT + 1))
-                else:
-                    player = choice((Q_ROBOT, RANDOM_ROBOT))
+            for j in range(ITERATIONS):
+                if j % 500 == 0:
+                    player_win_data[-1] /= 5
+                    agent_win_data[-1] /= 5
+                    player_moves[-1] /= 500
+                    agent_moves[-1] /= 500
+
+                    player_win_data.append(0)
+                    agent_win_data.append(0)
+                    player_moves.append(0)
+                    agent_moves.append(0)
+                    draw.append(0)
+                # if trainer:
+                #     player = choice((Q_ROBOT, Q_ROBOT + 1))
+                # else:
+                #     player = choice((Q_ROBOT, RANDOM_ROBOT))
+                player = Q_ROBOT
                 reward = REWARD_NOTHING
                 reward1 = REWARD_NOTHING
+                # Initialize the game
+                self.game = Game()
+                game_status = False
                 current_board = self.game.current_state
                 possible_moves = self.game.get_valid_locations(current_board)
                 learning_player.train(possible_moves, reward, learning_player.token, self.game)
@@ -260,24 +278,30 @@ class GameGUI:
                     if player == Q_ROBOT:
                         move = learning_player.get_optimal_move(current_board, possible_moves)
                         self.game.add_player_token(move[0], move[1], learning_player.token)
+                        player_moves[-1] += 1
                     else:
                         if trainer:
                             move = trained_player.get_optimal_move(current_board, possible_moves)
                         else:
                             move = trained_player.make_move(possible_moves)
                         self.game.add_player_token(move[0], move[1], trained_player.token)
+                        agent_moves[-1] += 1
                     self.game.update_current_state(self.game.board)
-                    if player == Q_ROBOT:
-                        if self.game.is_winning_move(move[0], move[1], learning_player.token):
-                            game_status = True
-                            reward, reward1 = REWARD_WIN, REWARD_LOSS
-                    else:
-                        if self.game.is_winning_move(move[0], move[1], trained_player.token):
-                            game_status = True
-                            reward, reward1 = REWARD_LOSS, REWARD_WIN
-                    if self.game.is_draw():
+                    if self.game.is_winning_move(move[0], move[1], learning_player.token):
+                        game_status = True
+                        reward, reward1 = REWARD_WIN, REWARD_LOSS
+                        player_win_data[-1] += 1
+                        break
+                    elif self.game.is_winning_move(move[0], move[1], trained_player.token):
+                        game_status = True
+                        reward, reward1 = REWARD_LOSS, REWARD_WIN
+                        agent_win_data[-1] += 1
+                        break
+                    elif self.game.is_draw():
                         game_status = True
                         reward, reward1 = REWARD_DRAW, REWARD_DRAW
+                        draw[-1] += 1
+                        break
                     player = 3 - player
                     # Train the Q-learning players
                     current_board = self.game.current_state
@@ -285,3 +309,17 @@ class GameGUI:
                     learning_player.train(possible_moves, reward, learning_player.token, self.game)
                     if trainer:
                         trained_player.train(possible_moves, reward1, trained_player.token, self.game)
+        plt.figure(1)
+        plt.title('Winning rate over games')
+        plt.xlabel('No. of games')
+        plt.ylabel('Average winning rate')
+        plt.plot(x, player_win_data, color='orange', label='Q-Learning Player')
+        plt.plot(x, agent_win_data, color='blue', label='Random Agent')
+        plt.show()
+        plt.figure(2)
+        plt.title('Moves over games')
+        plt.xlabel('No. of games')
+        plt.ylabel('Average moves')
+        plt.plot(x, player_moves, color='orange', label='Q-Learning Player')
+        plt.plot(x, agent_moves, color='blue', label='Random Agent')
+        plt.show()
