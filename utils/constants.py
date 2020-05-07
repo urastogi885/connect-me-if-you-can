@@ -20,7 +20,7 @@ MINMAX_ROBOT = 3
 # Define various rewards
 REWARD_WIN = 1
 REWARD_LOSS = -1
-REWARD_DRAW = 0.5
+REWARD_DRAW = 0.2
 REWARD_NOTHING = 0
 # Define various modes of the game
 GAME_NAME = 'CONNECT-4'
