@@ -109,7 +109,7 @@ class GameGUI:
                 self.run_single_player()
 
     def run_single_player(self, game_status=False):
-        q_player = QPlayer(epsilon=0.2)
+        q_player = QPlayer(epsilon=0.01)
         player = choice((HUMAN_PLAYER, Q_ROBOT))
         reward = REWARD_NOTHING
         current_board = self.game.current_state
@@ -161,6 +161,8 @@ class GameGUI:
                 self.game.add_player_token(move[0], move[1], player)
                 self.game.update_current_state(self.game.board)
                 if self.game.is_winning_move(move[0], move[1], player):
+                    label = self.font.render('Computer Wins!', True, YELLOW)
+                    self.screen.blit(label, (40, 10))
                     reward = REWARD_WIN
                     game_status = True
                 if self.game.is_draw():
@@ -233,29 +235,26 @@ class GameGUI:
         """
         player_win_data, agent_win_data, player_moves, agent_moves = [0], [0], [0], [0]
         draw = [0]
-        x = list(range(0, (100 * ITERATIONS) + 1, 500))
+        x = list(range(0, (100 * ITERATIONS) + 1, 100))
         learning_player = QPlayer(epsilon=0.6)
         if trainer:
-            trained_player = QPlayer(token=0, mem_location='memory/memory1.json')
+            trained_player = QPlayer(token=0, mem_location='memory/memory1.npy')
         else:
             trained_player = RandomPlayer(token=0)
         for i in range(100):
             print(i)
             learning_player.save_memory()
             if trainer:
-                trained_player.save_memory('memory/memory1.json')
-            for j in range(ITERATIONS):
-                if j % 500 == 0:
-                    player_win_data[-1] /= 5
-                    agent_win_data[-1] /= 5
-                    player_moves[-1] /= 500
-                    agent_moves[-1] /= 500
+                trained_player.save_memory('memory/memory1.npy')
+            player_moves[-1] = player_moves[-1] / ITERATIONS
+            agent_moves[-1] = agent_moves[-1] / ITERATIONS
 
-                    player_win_data.append(0)
-                    agent_win_data.append(0)
-                    player_moves.append(0)
-                    agent_moves.append(0)
-                    draw.append(0)
+            player_win_data.append(0)
+            agent_win_data.append(0)
+            player_moves.append(0)
+            agent_moves.append(0)
+            draw.append(0)
+            for j in range(ITERATIONS):
                 # if trainer:
                 #     player = choice((Q_ROBOT, Q_ROBOT + 1))
                 # else:
@@ -291,17 +290,14 @@ class GameGUI:
                         game_status = True
                         reward, reward1 = REWARD_WIN, REWARD_LOSS
                         player_win_data[-1] += 1
-                        break
                     elif self.game.is_winning_move(move[0], move[1], trained_player.token):
                         game_status = True
                         reward, reward1 = REWARD_LOSS, REWARD_WIN
                         agent_win_data[-1] += 1
-                        break
                     elif self.game.is_draw():
                         game_status = True
                         reward, reward1 = REWARD_DRAW, REWARD_DRAW
                         draw[-1] += 1
-                        break
                     player = 3 - player
                     # Train the Q-learning players
                     current_board = self.game.current_state
@@ -309,12 +305,17 @@ class GameGUI:
                     learning_player.train(possible_moves, reward, learning_player.token, self.game)
                     if trainer:
                         trained_player.train(possible_moves, reward1, trained_player.token, self.game)
+        # Take average of moves of the last iterations
+        player_moves[-1] = player_moves[-1] / ITERATIONS
+        agent_moves[-1] = agent_moves[-1] / ITERATIONS
+        # PLot the graphs
         plt.figure(1)
         plt.title('Winning rate over games')
         plt.xlabel('No. of games')
         plt.ylabel('Average winning rate')
         plt.plot(x, player_win_data, color='orange', label='Q-Learning Player')
         plt.plot(x, agent_win_data, color='blue', label='Random Agent')
+        plt.legend()
         plt.show()
         plt.figure(2)
         plt.title('Moves over games')
@@ -322,4 +323,5 @@ class GameGUI:
         plt.ylabel('Average moves')
         plt.plot(x, player_moves, color='orange', label='Q-Learning Player')
         plt.plot(x, agent_moves, color='blue', label='Random Agent')
+        plt.legend()
         plt.show()
