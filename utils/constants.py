@@ -28,6 +28,6 @@ GAME_MODES = {0: '2 Players', 1: 'vs Computer'}
 # Define various modes of learning
 LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minmax_agent': 2}
 # Define location of memory file
-MEM_LOCATION = 'memory/memory.json'
+MEM_LOCATION = 'memory/memory.npy'
 # Define variable to store no. of iterations to train the game robot
-ITERATIONS = 500
+ITERATIONS = 100
