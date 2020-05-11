@@ -1,5 +1,5 @@
 import random
-import json
+import pickle
 from numpy import ravel_multi_index
 from copy import deepcopy
 from utils.constants import *
@@ -43,15 +43,17 @@ class QPlayer(Player):
         self.exploration_chance = epsilon
         self.q_value = {}
         self.load_memory(mem_location)
+        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.01
 
     def load_memory(self, file_location=MEM_LOCATION):
-        with open(file_location, 'r') as memory:
-            self.q_value = json.load(memory)
+        with open(file_location, 'rb') as memory:
+            self.q_value = pickle.load(memory)
         memory.close()
 
     def save_memory(self, file_location=MEM_LOCATION):
-        with open(file_location, 'w+') as memory:
-            json.dump(self.q_value, memory, indent=2)
+        with open(file_location, 'wb') as memory:
+            pickle.dump(self.q_value, memory)
         memory.close()
 
     @staticmethod
@@ -136,6 +138,8 @@ class QPlayer(Player):
                 # Update Q-value of the state-action pair
                 move = str(ravel_multi_index(move, dims=BOARD_SIZE))
                 self.q_value[self.get_key(current_state)][move] = self.calc_q_value(reward, prev_q_value, max_q_value)
+        if self.exploration_chance > self.epsilon_min:
+            self.exploration_chance *= self.epsilon_decay
 
 
 class RandomPlayer(Player):
