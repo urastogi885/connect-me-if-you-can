@@ -236,7 +236,7 @@ class GameGUI:
         player_win_data, agent_win_data, player_moves, agent_moves = [0], [0], [0], [0]
         draw = [0]
         x = list(range(0, (100 * ITERATIONS) + 1, 100))
-        learning_player = QPlayer(epsilon=0.6)
+        learning_player = QPlayer(epsilon=1.0)
         if trainer:
             trained_player = QPlayer(token=0, mem_location='memory/memory1.npy')
         else:
