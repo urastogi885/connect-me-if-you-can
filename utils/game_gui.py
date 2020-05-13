@@ -305,6 +305,9 @@ class GameGUI:
                     learning_player.train(possible_moves, reward, learning_player.token, self.game)
                     if trainer:
                         trained_player.train(possible_moves, reward1, trained_player.token, self.game)
+                    if game_status:
+                        if learning_player.exploration_chance > learning_player.epsilon_min:
+                            learning_player.exploration_chance *= learning_player.epsilon_decay
         # Take average of moves of the last iterations
         player_moves[-1] = player_moves[-1] / ITERATIONS
         agent_moves[-1] = agent_moves[-1] / ITERATIONS
@@ -314,7 +317,7 @@ class GameGUI:
         plt.xlabel('No. of games')
         plt.ylabel('Average winning rate')
         plt.plot(x, player_win_data, color='orange', label='Q-Learning Player')
-        plt.plot(x, agent_win_data, color='blue', label='Random Agent')
+        plt.plot(x, agent_win_data, color='blue', label='Trained Agent')
         plt.legend()
         plt.show()
         plt.figure(2)
@@ -322,6 +325,6 @@ class GameGUI:
         plt.xlabel('No. of games')
         plt.ylabel('Average moves')
         plt.plot(x, player_moves, color='orange', label='Q-Learning Player')
-        plt.plot(x, agent_moves, color='blue', label='Random Agent')
+        plt.plot(x, agent_moves, color='blue', label='Trained Agent')
         plt.legend()
         plt.show()
