@@ -6,6 +6,8 @@ A self-learning connect-4 game with a simple GUI.
 
 ## Todo
 - Add reset option in GUI
+- Add another trained agent
+- Train a Deep Q-Network for the computer player
 
 ## Dependencies
 
