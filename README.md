@@ -5,12 +5,9 @@
 A self-learning connect-4 game with a simple GUI.
 
 ## Todo
-
-- Implement self-learning algorithm for the game
-- Add various playing options such as 2 player, play versus computer, ai vs ai
-- Check for the tie condition
-- Reset board upon reaching the tie condition
 - Add reset option in GUI
+- Add another trained agent
+- Train a Deep Q-Network for the computer player
 
 ## Dependencies
 
