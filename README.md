@@ -29,7 +29,6 @@ pip3 install numpy pygame
 - Now use the following commands to check libraries: (Exit python window using Ctrl+Z if an error pops up while
 running the below commands)
 ````
-import tkinter
 import numpy
 import pygame
 ````
