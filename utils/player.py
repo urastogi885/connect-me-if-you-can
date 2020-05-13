@@ -108,7 +108,7 @@ class QPlayer(Player):
     def get_max_q_value(self, state, moves):
         """
         Method to get the maximum Q-value of the current state of the board
-        :param next_states: a list of possible state of the board w.r.t each of the possible moves
+        :param state: Current or next state of the game
         :param moves: a list of possible moves on the board
         :return: maximum Q-value of the current state of the board and list of all Q-values
         """
@@ -138,8 +138,6 @@ class QPlayer(Player):
                 # Update Q-value of the state-action pair
                 move = str(ravel_multi_index(move, dims=BOARD_SIZE))
                 self.q_value[self.get_key(current_state)][move] = self.calc_q_value(reward, prev_q_value, max_q_value)
-        if self.exploration_chance > self.epsilon_min:
-            self.exploration_chance *= self.epsilon_decay
 
 
 class RandomPlayer(Player):
