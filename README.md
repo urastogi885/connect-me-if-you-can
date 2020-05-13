@@ -12,14 +12,13 @@ A self-learning connect-4 game with a simple GUI.
 ## Dependencies
 
 - Python3
-- Python3-tk
 - Python3 Libraries: [Numpy](https://numpy.org/), [PyGame](https://www.pygame.org/wiki/GettingStarted)
 
 ## Install Dependencies
 
-- Install Python3, Python3-tk, and the necessary libraries: (if not already installed)
+- Install Python3, and the necessary libraries: (if not already installed)
 ````
-sudo apt install python3 python3-tk
+sudo apt install python3
 sudo apt install python3-pip
 pip3 install numpy pygame
 ````
