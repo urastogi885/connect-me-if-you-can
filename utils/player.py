@@ -160,7 +160,7 @@ class RandomPlayer(Player):
         return random.choice(valid_moves)
 
 
-class MinMaxPlayer(Player):
+class MiniMaxPlayer(Player):
     """
     A class that represents a player trained using the MinMax algorithm
     """

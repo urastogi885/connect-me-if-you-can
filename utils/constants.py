@@ -16,7 +16,7 @@ YELLOW = 255, 255, 0
 HUMAN_PLAYER = 0
 Q_ROBOT = 1
 RANDOM_ROBOT = 2
-MINMAX_ROBOT = 3
+MINIMAX_ROBOT = 3
 # Define various rewards
 REWARD_WIN = 1
 REWARD_LOSS = -1
@@ -26,7 +26,7 @@ REWARD_NOTHING = 0
 GAME_NAME = 'CONNECT-4'
 GAME_MODES = {0: '2 Players', 1: 'vs Computer'}
 # Define various modes of learning
-LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minmax_agent': 2}
+LEARNING_MODES = {'random_agent': 0, 'trained_agent': 1, 'minimax_agent': 2}
 NO_TOKEN = 0
 # Define location of memory file
 MEM_LOCATION = 'memory/memory.npy'
