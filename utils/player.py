@@ -169,4 +169,55 @@ class MinMaxPlayer(Player):
         Initialize the min-max player with its token
         :param token: integer that represents the player on the board
         """
-        self.token = token
+        Player.__init__(self, token)
+        self.window_length = 4
+
+    @staticmethod
+    def evaluate_window(window, token_player, token_opponent):
+        # Initialize current window score as 0
+        score = 0
+        # Count the no. of minmax player's tokens in the window
+        player_token_count = window.count(token_player)
+        # Appropriate reward according to the status of the window
+        if player_token_count == 4:
+            score += 100
+        elif player_token_count == 3 and window.count(NO_TOKEN) == 1:
+            score += 5
+        elif player_token_count == 2 and window.count(NO_TOKEN) == 2:
+            score += 2
+        elif window.count(token_opponent) == 3 and window.count(NO_TOKEN) == 1:
+            score -= 4
+        # Return the final score for the given window
+        return score
+
+    def score_position(self, board, token, token_opp):
+        # Initialize score for the current status of the board
+        score = 0
+        # Score center column
+        center_array = [int(i) for i in list(board[:, BOARD_SIZE[1]//2])]
+        center_count = center_array.count(token)
+        score += center_count * 3
+        # Score Horizontal
+        for r in range(BOARD_SIZE[0]):
+            row_array = [int(i) for i in list(board[r,:])]
+            for c in range(BOARD_SIZE[1]-3):
+                window = row_array[c:c+self.window_length]
+                score += self.evaluate_window(window, token, token_opp)
+        # Score Vertical
+        for c in range(BOARD_SIZE[1]):
+            col_array = [int(i) for i in list(board[:,c])]
+            for r in range(BOARD_SIZE[0]-3):
+                window = col_array[r:r+self.window_length]
+                score += self.evaluate_window(window, token, token_opp)
+        # Score positive sloped diagonal
+        for r in range(BOARD_SIZE[0]-3):
+            for c in range(BOARD_SIZE[1]-3):
+                window = [board[r+i][c+i] for i in range(self.window_length)]
+                score += self.evaluate_window(window, token, token_opp)
+        # Score negative sloped diagonal
+        for r in range(BOARD_SIZE[0]-3):
+            for c in range(BOARD_SIZE[1]-3):
+                window = [board[r+3-i][c+i] for i in range(self.window_length)]
+                score += self.evaluate_window(window, token, token_opp)
+        # Return final score for the current board
+        return score
