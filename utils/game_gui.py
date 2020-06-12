@@ -1,6 +1,6 @@
 import pygame
-from random import choice
 from sys import exit
+from random import choice
 import matplotlib.pyplot as plt
 from utils.game import Game
 from utils.player import *
@@ -237,14 +237,16 @@ class GameGUI:
         draw = [0]
         x = list(range(0, (100 * ITERATIONS) + 1, 100))
         learning_player = QPlayer(epsilon=1.0)
-        if trainer:
+        if trainer == 1:
             trained_player = QPlayer(token=0, mem_location='memory/memory1.npy')
+        elif trainer == 2:
+            trained_player = MiniMaxPlayer(token=0)
         else:
             trained_player = RandomPlayer(token=0)
-        for i in range(100):
+        for i in range(ITERATIONS):
             print(i)
             learning_player.save_memory()
-            if trainer:
+            if trainer == 1:
                 trained_player.save_memory('memory/memory1.npy')
             player_moves[-1] = player_moves[-1] / ITERATIONS
             agent_moves[-1] = agent_moves[-1] / ITERATIONS
@@ -255,10 +257,7 @@ class GameGUI:
             agent_moves.append(0)
             draw.append(0)
             for j in range(ITERATIONS):
-                # if trainer:
-                #     player = choice((Q_ROBOT, Q_ROBOT + 1))
-                # else:
-                #     player = choice((Q_ROBOT, RANDOM_ROBOT))
+                prev_move = None, None
                 player = Q_ROBOT
                 reward = REWARD_NOTHING
                 reward1 = REWARD_NOTHING
@@ -268,8 +267,10 @@ class GameGUI:
                 current_board = self.game.current_state
                 possible_moves = self.game.get_valid_locations(current_board)
                 learning_player.train(possible_moves, reward, learning_player.token, self.game)
-                if trainer:
+                if trainer == 1:
                     trained_player.train(possible_moves, reward1, trained_player.token, self.game)
+                elif trainer == 2:
+                    trained_player.depth = MINI_MAX_DEPTH
                 while not game_status:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -279,8 +280,13 @@ class GameGUI:
                         self.game.add_player_token(move[0], move[1], learning_player.token)
                         player_moves[-1] += 1
                     else:
-                        if trainer:
+                        if trainer == 1:
                             move = trained_player.get_optimal_move(current_board, possible_moves)
+                        elif trainer == 2:
+                            trained_player.depth = MINI_MAX_DEPTH
+                            move = trained_player.mini_max(deepcopy(self.game), prev_move,
+                                                           (learning_player.token, trained_player.token),
+                                                           -float('inf'), float('inf'), True)[0]
                         else:
                             move = trained_player.make_move(possible_moves)
                         self.game.add_player_token(move[0], move[1], trained_player.token)
@@ -298,12 +304,15 @@ class GameGUI:
                         game_status = True
                         reward, reward1 = REWARD_DRAW, REWARD_DRAW
                         draw[-1] += 1
+                    # Update player turn
                     player = 3 - player
+                    # Update previous mode
+                    prev_move = move
                     # Train the Q-learning players
                     current_board = self.game.current_state
                     possible_moves = self.game.get_valid_locations(current_board)
                     learning_player.train(possible_moves, reward, learning_player.token, self.game)
-                    if trainer:
+                    if trainer == 1:
                         trained_player.train(possible_moves, reward1, trained_player.token, self.game)
                     if game_status:
                         if learning_player.exploration_chance > learning_player.epsilon_min:
