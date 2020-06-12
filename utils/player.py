@@ -226,13 +226,14 @@ class MiniMaxPlayer(Player):
         return score
 
     def mini_max(self, game, last_token_pos, player_tokens, alpha, beta, maximizing_player):
-        # Evaluate scores for various game terminating scenarios
-        if game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[1]):
-            return None, self.win_score
-        elif game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[0]):
-            return None, -self.win_score
-        elif game.is_draw():  # Game is over, no more valid moves
-            return None, 0
+        if last_token_pos != (None, None):
+            # Evaluate scores for various game terminating scenarios
+            if game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[1]):
+                return None, self.win_score
+            elif game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[0]):
+                return None, -self.win_score
+            elif game.is_draw():  # Game is over, no more valid moves
+                return None, 0
         # Depth is 0
         if self.depth == 0:
             return None, self.score_position(game.board, player_tokens[1], player_tokens[0])
