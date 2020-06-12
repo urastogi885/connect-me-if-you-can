@@ -16,7 +16,7 @@ YELLOW = 255, 255, 0
 HUMAN_PLAYER = 0
 Q_ROBOT = 1
 RANDOM_ROBOT = 2
-MINIMAX_ROBOT = 3
+MINI_MAX_ROBOT = 3
 # Define various rewards
 REWARD_WIN = 1
 REWARD_LOSS = -1
@@ -32,3 +32,5 @@ NO_TOKEN = 0
 MEM_LOCATION = 'memory/memory.npy'
 # Define variable to store no. of iterations to train the game robot
 ITERATIONS = 100
+# Define depth of mini-max player
+MINI_MAX_DEPTH = 5
