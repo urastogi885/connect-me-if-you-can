@@ -1,3 +1,4 @@
+import math
 import random
 import pickle
 from numpy import ravel_multi_index
@@ -164,13 +165,15 @@ class MiniMaxPlayer(Player):
     """
     A class that represents a player trained using the MinMax algorithm
     """
-    def __init__(self, token=MINMAX_ROBOT):
+    def __init__(self, token=MINI_MAX_ROBOT):
         """
         Initialize the min-max player with its token
         :param token: integer that represents the player on the board
         """
         Player.__init__(self, token)
         self.window_length = 4
+        self.win_score = 100000000000
+        self.depth = MINI_MAX_DEPTH
 
     @staticmethod
     def evaluate_window(window, token_player, token_opponent):
@@ -221,3 +224,49 @@ class MiniMaxPlayer(Player):
                 score += self.evaluate_window(window, token, token_opp)
         # Return final score for the current board
         return score
+
+    def mini_max(self, game, last_token_pos, player_tokens, alpha, beta, maximizing_player):
+        # Evaluate scores for various game terminating scenarios
+        if game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[1]):
+            return None, self.win_score
+        elif game.is_winning_move(last_token_pos[0], last_token_pos[1], player_tokens[0]):
+            return None, -self.win_score
+        elif game.is_draw():  # Game is over, no more valid moves
+            return None, 0
+        # Depth is 0
+        if self.depth == 0:
+            return None, self.score_position(game.board, player_tokens[1], player_tokens[0])
+        # Start minimax algorithm
+        # Get valid move locations from the board
+        valid_locations = game.get_valid_locations(game.board)
+
+        if maximizing_player:
+            value = -math.inf
+            move = random.choice(valid_locations)
+            for loc in valid_locations:
+                game_copy = deepcopy(game)
+                game_copy.add_player_token(loc[0], loc[1], player_tokens[1])
+                self.depth -= 1
+                new_score = self.mini_max(game_copy, loc, player_tokens, alpha, beta, False)[1]
+                if new_score > value:
+                    value = new_score
+                    move = loc
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return move, value
+        else:
+            value = math.inf
+            move = random.choice(valid_locations)
+            for loc in valid_locations:
+                game_copy = deepcopy(game)
+                game_copy.add_player_token(loc[0], loc[1], player_tokens[1])
+                self.depth -= 1
+                new_score = self.mini_max(game_copy, loc, player_tokens, alpha, beta, True)[1]
+                if new_score < value:
+                    value = new_score
+                    move = loc
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
+            return move, value
