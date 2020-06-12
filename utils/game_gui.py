@@ -258,7 +258,7 @@ class GameGUI:
             draw.append(0)
             for j in range(ITERATIONS):
                 prev_move = None, None
-                player = Q_ROBOT
+                player = choice((Q_ROBOT, RANDOM_ROBOT))
                 reward = REWARD_NOTHING
                 reward1 = REWARD_NOTHING
                 # Initialize the game
