@@ -11,9 +11,6 @@ Connect-4 has a huge state space that renders Q-Learning ineffective. An approac
   <br><b>Figure 1 - AI agent (Yellow) playing against a human (Red)</b><br>
 </p>
 
-## Todo
-- Train a Deep Q-Network for the computer player
-
 ## Dependencies
 
 - Python3
